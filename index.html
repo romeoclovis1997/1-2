@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Calculator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .calculator {
+            width: 320px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+        }
+        .display {
+            width: 100%;
+            height: 50px;
+            text-align: right;
+            padding: 15px;
+            border: none;
+            border-bottom: 3px solid #0288d1;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        .button {
+            width: 100%;
+            padding: 20px;
+            font-size: 22px;
+            border: none;
+            border-radius: 8px;
+            background-color: #b3e5fc;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #81d4fa;
+        }
+        .button:active {
+            background-color: #4fc3f7;
+        }
+        .button.operation {
+            background-color: #ffb300;
+            color: #fff;
+        }
+        .button.operation:hover {
+            background-color: #ffa000;
+        }
+        .button.operation:active {
+            background-color: #ff8f00;
+        }
+        .button.equals {
+            background-color: #d32f2f;
+            color: #fff;
+            grid-column: span 2;
+        }
+        .button.equals:hover {
+            background-color: #c62828;
+        }
+        .button.equals:active {
+            background-color: #b71c1c;
+        }
+        .button.clear {
+            background-color: #0288d1;
+            color: #fff;
+            grid-column: span 2;
+        }
+        .button.clear:hover {
+            background-color: #0277bd;
+        }
+        .button.clear:active {
+            background-color: #01579b;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" class="display" id="display" disabled>
+        <div class="buttons">
+            <button class="button" onclick="appendNumber(7)">7</button>
+            <button class="button" onclick="appendNumber(8)">8</button>
+            <button class="button" onclick="appendNumber(9)">9</button>
+            <button class="button operation" onclick="chooseOperation('+')">+</button>
+
+            <button class="button" onclick="appendNumber(4)">4</button>
+            <button class="button" onclick="appendNumber(5)">5</button>
+            <button class="button" onclick="appendNumber(6)">6</button>
+            <button class="button operation" onclick="chooseOperation('-')">-</button>
+
+            <button class="button" onclick="appendNumber(1)">1</button>
+            <button class="button" onclick="appendNumber(2)">2</button>
+            <button class="button" onclick="appendNumber(3)">3</button>
+            <button class="button operation" onclick="chooseOperation('*')">×</button>
+
+            <button class="button" onclick="appendNumber(0)">0</button>
+            <button class="button" onclick="appendDot()">.</button>
+            <button class="button operation" onclick="chooseOperation('/')">/</button>
+            <button class="button operation" onclick="chooseOperation('%')">%</button>
+
+            <button class="button operation" onclick="computeSqrt()">√</button>
+            <button class="button clear" onclick="clearDisplay()">C</button>
+            <button class="button equals" onclick="compute()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentOperand = '';
+        let previousOperand = '';
+        let operation = undefined;
+
+        function appendNumber(number) {
+            if (number === '.' && currentOperand.includes('.')) return;
+            currentOperand = currentOperand.toString() + number.toString();
+            updateDisplay();
+        }
+
+        function appendDot() {
+            if (!currentOperand.includes('.')) {
+                currentOperand += '.';
+                updateDisplay();
+            }
+        }
+
+        function chooseOperation(op) {
+            if (currentOperand === '') return;
+            if (previousOperand !== '') {
+                compute();
+            }
+            operation = op;
+            previousOperand = currentOperand;
+            currentOperand = '';
+        }
+
+        function compute() {
+            let computation;
+            const prev = parseFloat(previousOperand);
+            const current = parseFloat(currentOperand);
+            if (isNaN(prev) || isNaN(current)) return;
+            switch (operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '*':
+                    computation = prev * current;
+                    break;
+                case '/':
+                    computation = prev / current;
+                    break;
+                case '%':
+                    computation = prev % current;
+                    break;
+                default:
+                    return;
+            }
+            currentOperand = computation;
+            operation = undefined;
+            previousOperand = '';
+            updateDisplay();
+        }
+
+        function computeSqrt() {
+            if (currentOperand === '') return;
+            currentOperand = Math.sqrt(parseFloat(currentOperand));
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentOperand = '';
+            previousOperand = '';
+            operation = undefined;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            display.value = currentOperand;
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key >= '0' && event.key <= '9') {
+                appendNumber(event.key);
+            } else if (event.key === '.') {
+                appendDot();
+            } else if (event.key === 'Enter' || event.key === '=') {
+                compute();
+            } else if (event.key === 'Backspace') {
+                currentOperand = currentOperand.slice(0, -1);
+                updateDisplay();
+            } else if (event.key === 'Escape') {
+                clearDisplay();
+            } else if (event.key === '+' || event.key === '-' || event.key === '*' || event.key === '/' || event.key === '%') {
+                chooseOperation(event.key);
+            } else if (event.key === 's') {
+                computeSqrt();
+            }
+        });
+    </script>
+</body>
+</html>
